@@ -77,7 +77,7 @@ const Hero = () => {
             className="inline-block bg-[#8B0000] text-white px-8 py-3 rounded-full text-lg font-semibold
                      transform transition-transform duration-300 hover:scale-105 hover:bg-[#A52A2A]"
           >
-            Book Now
+            book Now
           </button>
         </div>
       </div>

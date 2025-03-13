@@ -42,7 +42,7 @@ const RouteCard: React.FC<RouteCardProps> = ({ from, to, price, time, nextBus })
             className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700 transition-colors"
             onClick={handleBookNowClick}
           >
-            Book Now
+            Book now
           </button>
         </div>
       </div>
