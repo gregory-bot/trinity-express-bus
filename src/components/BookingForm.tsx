@@ -1,16 +1,20 @@
 import React, { useState } from 'react';
 import { MapPin, Calendar, Clock, X } from 'lucide-react';
+import { initiateC2BPayment } from '../services/mpesaService';
 
 const BookingForm = () => {
   const [formData, setFormData] = useState({
     from: '',
     to: '',
     date: '',
-    time: ''
+    time: '',
+    phoneNumber: '254769002525', // Default phone number
   });
 
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [routeInfo, setRouteInfo] = useState<{ price?: string; duration?: string } | null>(null);
+  const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const locations = [
     "NAIROBI",
@@ -20,14 +24,14 @@ const BookingForm = () => {
   ];
 
   const routePrices = {
-    "NAIROBI-KIGALI": { price: "KSh 7000", duration: "12 hours" },
-    "NAIROBI-KAMPALA": { price: "KSh 4000", duration: "10 hours" },
-    "NAIROBI-JUBA": { price: "KSh 9000", duration: "15 hours" },
-    "KIGALI-NAIROBI": { price: "60000 FRW/ KSH 7,200", duration: "12 hours" },
-    "KIGALI-KAMPALA": { price: "25000 FRW/ KSH 3,000", duration: "8 hours" },
-    "KAMPALA-NAIROBI": { price: "100000 UGX/ KSH 3,800 ", duration: "10 hours" },
-    "KAMPALA-JUBA": { price: "130000 UGX/ KSH 4,940 ", duration: "14 hours" },
-    "KAMPALA-KIGALI": { price: "100000 UGX/ KSH 3,800", duration: "8 hours" }
+    "NAIROBI-KIGALI": { price: "7000", duration: "12 hours" },
+    "NAIROBI-KAMPALA": { price: "4000", duration: "10 hours" },
+    "NAIROBI-JUBA": { price: "9000", duration: "15 hours" },
+    "KIGALI-NAIROBI": { price: "7200", duration: "12 hours" },
+    "KIGALI-KAMPALA": { price: "3000", duration: "8 hours" },
+    "KAMPALA-NAIROBI": { price: "3800", duration: "10 hours" },
+    "KAMPALA-JUBA": { price: "4940", duration: "14 hours" },
+    "KAMPALA-KIGALI": { price: "3800", duration: "8 hours" }
   };
 
   const handleDestinationChange = (destination: string) => {
@@ -44,6 +48,33 @@ const BookingForm = () => {
     e.preventDefault();
     if (formData.from && formData.to && formData.date && formData.time) {
       setShowConfirmation(true);
+    }
+  };
+
+  const handlePayment = async () => {
+    try {
+      setPaymentStatus('processing');
+      setErrorMessage('');
+      
+      if (!routeInfo) {
+        throw new Error('Route information not available');
+      }
+
+      const amount = parseInt(routeInfo.price);
+      const response = await initiateC2BPayment(amount, formData.phoneNumber);
+      
+      if (response.ResponseCode === '0') {
+        setPaymentStatus('success');
+        // You can add additional logic here to handle successful payment
+        // For example, saving the booking to a database
+      } else {
+        setPaymentStatus('error');
+        setErrorMessage('Payment initiation failed. Please try again.');
+      }
+    } catch (error) {
+      setPaymentStatus('error');
+      setErrorMessage('An error occurred during payment. Please try again.');
+      console.error('Payment error:', error);
     }
   };
 
@@ -128,7 +159,7 @@ const BookingForm = () => {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Fare:</p>
-                <p className="font-semibold text-[#8B0000]">{routeInfo.price}</p>
+                <p className="font-semibold text-[#8B0000]">KSh {routeInfo.price}</p>
               </div>
             </div>
           </div>
@@ -168,21 +199,48 @@ const BookingForm = () => {
               {routeInfo && (
                 <div className="border-b pb-4">
                   <h4 className="font-semibold mb-2">Fare Details</h4>
-                  <p className="text-gray-600">Amount: {routeInfo.price}</p>
+                  <p className="text-gray-600">Amount: KSh {routeInfo.price}</p>
                   <p className="text-gray-600">Duration: {routeInfo.duration}</p>
                 </div>
               )}
               
               <div className="pt-4">
-                <button
-                  onClick={() => {
-                    alert('Proceeding to payment...');
-                    setShowConfirmation(false);
-                  }}
-                  className="w-full bg-[#8B0000] text-white py-3 px-4 rounded-md hover:bg-[#A52A2A] transition-colors font-semibold"
-                >
-                  Proceed to Payment
-                </button>
+                {paymentStatus === 'idle' && (
+                  <button
+                    onClick={handlePayment}
+                    className="w-full bg-[#8B0000] text-white py-3 px-4 rounded-md hover:bg-[#A52A2A] transition-colors font-semibold"
+                  >
+                    Pay with M-Pesa
+                  </button>
+                )}
+                
+                {paymentStatus === 'processing' && (
+                  <div className="text-center py-3">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8B0000] mx-auto"></div>
+                    <p className="mt-2 text-gray-600">Processing payment...</p>
+                  </div>
+                )}
+                
+                {paymentStatus === 'success' && (
+                  <div className="text-center py-3">
+                    <p className="text-green-600 font-semibold">Payment initiated successfully!</p>
+                    <p className="text-sm text-gray-600 mt-2">Please check your phone for the M-Pesa prompt.</p>
+                  </div>
+                )}
+                
+                {paymentStatus === 'error' && (
+                  <div className="text-center py-3">
+                    <p className="text-red-600 font-semibold">Payment failed</p>
+                    <p className="text-sm text-gray-600 mt-2">{errorMessage}</p>
+                    <button
+                      onClick={handlePayment}
+                      className="mt-4 w-full bg-[#8B0000] text-white py-3 px-4 rounded-md hover:bg-[#A52A2A] transition-colors font-semibold"
+                    >
+                      Try Again
+                    </button>
+                  </div>
+                )}
+                
                 <button
                   onClick={() => setShowConfirmation(false)}
                   className="w-full mt-2 border border-gray-300 text-gray-700 py-3 px-4 rounded-md hover:bg-gray-50 transition-colors font-semibold"
