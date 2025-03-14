@@ -126,4 +126,55 @@ export const handleC2BValidation = async (data: any) => {
     console.error('Error handling C2B validation:', error);
     throw error;
   }
+};
+
+// Initiate STK Push
+export const initiateSTKPush = async (amount: number, phoneNumber: string) => {
+  try {
+    const accessToken = await getAccessToken();
+    const timestamp = generateTimestamp();
+    const password = generatePassword();
+
+    const response = await axios.post(
+      `${config.baseURL}/mpesa/stkpush/v1/processrequest`,
+      {
+        BusinessShortCode: config.businessShortCode,
+        Password: password,
+        Timestamp: timestamp,
+        TransactionType: 'CustomerPayBillOnline',
+        Amount: amount,
+        PartyA: phoneNumber,
+        PartyB: config.businessShortCode,
+        PhoneNumber: phoneNumber,
+        CallBackURL: 'https://your-domain.com/api/stk/callback',
+        AccountReference: 'TrinityExpress',
+        TransactionDesc: 'Bus Ticket Payment'
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error initiating STK Push:', error);
+    throw error;
+  }
+};
+
+// Handle STK Push Callback
+export const handleSTKPushCallback = async (data: any) => {
+  try {
+    // Process the callback data
+    // You can store the transaction details in your database here
+    return {
+      ResultCode: 0,
+      ResultDesc: 'Success',
+    };
+  } catch (error) {
+    console.error('Error handling STK Push callback:', error);
+    throw error;
+  }
 }; 

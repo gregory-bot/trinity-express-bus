@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { MapPin, Calendar, Clock, X } from 'lucide-react';
-import { initiateC2BPayment } from '../services/mpesaService';
+import { MapPin, Calendar, Clock, X, Phone } from 'lucide-react';
+import { initiateSTKPush } from '../services/mpesaService';
 
 const BookingForm = () => {
   const [formData, setFormData] = useState({
@@ -8,13 +8,14 @@ const BookingForm = () => {
     to: '',
     date: '',
     time: '',
-    phoneNumber: '254769002525', // Default phone number
+    phoneNumber: '',
   });
 
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [routeInfo, setRouteInfo] = useState<{ price?: string; duration?: string } | null>(null);
   const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
+  const [showPhoneInput, setShowPhoneInput] = useState(false);
 
   const locations = [
     "NAIROBI",
@@ -51,6 +52,14 @@ const BookingForm = () => {
     }
   };
 
+  const handlePhoneSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (formData.phoneNumber) {
+      setShowPhoneInput(false);
+      handlePayment();
+    }
+  };
+
   const handlePayment = async () => {
     try {
       setPaymentStatus('processing');
@@ -60,8 +69,13 @@ const BookingForm = () => {
         throw new Error('Route information not available');
       }
 
+      if (!formData.phoneNumber) {
+        setShowPhoneInput(true);
+        return;
+      }
+
       const amount = parseInt(routeInfo.price);
-      const response = await initiateC2BPayment(amount, formData.phoneNumber);
+      const response = await initiateSTKPush(amount, formData.phoneNumber);
       
       if (response.ResponseCode === '0') {
         setPaymentStatus('success');
@@ -173,6 +187,62 @@ const BookingForm = () => {
         </button>
       </form>
 
+      {/* Phone Number Input Modal */}
+      {showPhoneInput && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold">Enter Phone Number</h3>
+              <button
+                onClick={() => setShowPhoneInput(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X size={24} />
+              </button>
+            </div>
+            
+            <form onSubmit={handlePhoneSubmit} className="space-y-4">
+              <div className="relative">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  M-Pesa Phone Number
+                </label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <input
+                    type="tel"
+                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="254XXXXXXXXX"
+                    value={formData.phoneNumber}
+                    onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                    pattern="254[0-9]{9}"
+                    required
+                  />
+                </div>
+                <p className="mt-1 text-sm text-gray-500">
+                  Format: 254XXXXXXXXX (e.g., 254712345678)
+                </p>
+              </div>
+              
+              <div className="flex space-x-4">
+                <button
+                  type="submit"
+                  className="flex-1 bg-[#8B0000] text-white py-2 px-4 rounded-md hover:bg-[#A52A2A] transition-colors"
+                >
+                  Continue
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowPhoneInput(false)}
+                  className="flex-1 border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Confirmation Modal */}
       {showConfirmation && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -223,8 +293,8 @@ const BookingForm = () => {
                 
                 {paymentStatus === 'success' && (
                   <div className="text-center py-3">
-                    <p className="text-green-600 font-semibold">Payment initiated successfully!</p>
-                    <p className="text-sm text-gray-600 mt-2">Please check your phone for the M-Pesa prompt.</p>
+                    <p className="text-green-600 font-semibold">STK Push initiated successfully!</p>
+                    <p className="text-sm text-gray-600 mt-2">Please check your phone for the M-Pesa prompt to enter your PIN.</p>
                   </div>
                 )}
                 
