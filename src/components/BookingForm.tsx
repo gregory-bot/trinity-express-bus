@@ -59,7 +59,7 @@ const BookingForm = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.from && formData.to && formData.date) {
-      setShowConfirmation(true);
+      setShowPhoneInput(true);
     }
   };
 
@@ -67,7 +67,7 @@ const BookingForm = () => {
     e.preventDefault();
     if (formData.phoneNumber) {
       setShowPhoneInput(false);
-      handlePayment();
+      setShowConfirmation(true);
     }
   };
 
