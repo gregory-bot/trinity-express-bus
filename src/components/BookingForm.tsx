@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MapPin, Calendar, Clock, X, Phone } from 'lucide-react';
+import { MapPin, Calendar, X, Phone } from 'lucide-react';
 import { initiateSTKPush } from '../services/mpesaService';
 
 interface RouteInfo {
@@ -19,7 +19,6 @@ const BookingForm = () => {
     from: '',
     to: '',
     date: '',
-    time: '',
     phoneNumber: '',
   });
 
@@ -59,7 +58,7 @@ const BookingForm = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.from && formData.to && formData.date && formData.time) {
+    if (formData.from && formData.to && formData.date) {
       setShowConfirmation(true);
     }
   };
@@ -111,7 +110,7 @@ const BookingForm = () => {
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid md:grid-cols-2 gap-4">
           <div className="relative">
-            <label className="block text-sm font-medium text-gray-700 mb-1">from</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">From</label>
             <div className="relative">
               <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <select
@@ -130,7 +129,7 @@ const BookingForm = () => {
           </div>
 
           <div className="relative">
-            <label className="block text-sm font-medium text-gray-700 mb-1">to</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">To</label>
             <div className="relative">
               <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <select
@@ -158,19 +157,6 @@ const BookingForm = () => {
                 value={formData.date}
                 min={new Date().toISOString().split('T')[0]}
                 onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-              />
-            </div>
-          </div>
-
-          <div className="relative">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
-            <div className="relative">
-              <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="time"
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                value={formData.time}
-                onChange={(e) => setFormData({ ...formData, time: e.target.value })}
               />
             </div>
           </div>
@@ -275,7 +261,6 @@ const BookingForm = () => {
                 <p className="text-red-600">From: {formData.from}</p>
                 <p className="text-gray-600">To: {formData.to}</p>
                 <p className="text-gray-600">Date: {formData.date}</p>
-                <p className="text-gray-600">Time: {formData.time}</p>
               </div>
               
               {routeInfo && (

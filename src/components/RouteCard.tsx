@@ -5,7 +5,6 @@ interface RouteCardProps {
   from: string;
   to: string;
   price: string;
-  time: string;
   nextBus: string;
 }
 
