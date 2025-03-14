@@ -2,6 +2,18 @@ import React, { useState } from 'react';
 import { MapPin, Calendar, Clock, X, Phone } from 'lucide-react';
 import { initiateSTKPush } from '../services/mpesaService';
 
+interface RouteInfo {
+  price: string;
+  duration: string;
+}
+
+interface STKPushResponse {
+  ResponseCode: string;
+  ResponseDescription: string;
+  CheckoutRequestID: string;
+  MerchantRequestID: string;
+}
+
 const BookingForm = () => {
   const [formData, setFormData] = useState({
     from: '',
@@ -12,7 +24,7 @@ const BookingForm = () => {
   });
 
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [routeInfo, setRouteInfo] = useState<{ price?: string; duration?: string } | null>(null);
+  const [routeInfo, setRouteInfo] = useState<RouteInfo | null>(null);
   const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
   const [showPhoneInput, setShowPhoneInput] = useState(false);
@@ -24,7 +36,7 @@ const BookingForm = () => {
     "JUBA"
   ];
 
-  const routePrices = {
+  const routePrices: Record<string, RouteInfo> = {
     "NAIROBI-KIGALI": { price: "7000", duration: "12 hours" },
     "NAIROBI-KAMPALA": { price: "4000", duration: "10 hours" },
     "NAIROBI-JUBA": { price: "9000", duration: "15 hours" },
@@ -39,7 +51,7 @@ const BookingForm = () => {
     setFormData(prev => ({ ...prev, to: destination }));
     const routeKey = `${formData.from}-${destination}`;
     if (routeKey in routePrices) {
-      setRouteInfo(routePrices[routeKey as keyof typeof routePrices]);
+      setRouteInfo(routePrices[routeKey]);
     } else {
       setRouteInfo(null);
     }
@@ -75,7 +87,7 @@ const BookingForm = () => {
       }
 
       const amount = parseInt(routeInfo.price);
-      const response = await initiateSTKPush(amount, formData.phoneNumber);
+      const response = await initiateSTKPush(amount, formData.phoneNumber) as STKPushResponse;
       
       if (response.ResponseCode === '0') {
         setPaymentStatus('success');
