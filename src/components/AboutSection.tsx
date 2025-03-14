@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 
 const AboutSection = () => {
   const images = [
-    "https://i.postimg.cc/8PwJ2KCG/trinity.jpg",
     "https://i.postimg.cc/Bv24xFRH/mwendus.jpg",
+    "https://i.postimg.cc/8PwJ2KCG/trinity.jpg",
     "https://i.postimg.cc/YSXwkFWh/trin333.jpg",
   ];
 
@@ -63,7 +63,7 @@ const AboutSection = () => {
               />
               <div className="absolute -bottom-6 -left-6 bg-[#8B0000] text-white p-4 rounded-lg">
                 <p className="text-2xl font-bold">10+</p>
-                <p className="text-sm">Years of service</p>
+                <p className="text-sm">Years of Quality services</p>
               </div>
             </div>
           </div>
