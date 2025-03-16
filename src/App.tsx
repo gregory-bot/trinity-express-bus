@@ -7,7 +7,7 @@ import AboutSection from './components/AboutSection';
 import MoreSection from './components/MoreSection';
 import ContactSection from './components/ContactSection';
 import Footer from './components/Footer';
-import { initiateSTKPush } from './services/mpesaService';
+import ChatWidget from './components/ChatWidget';
 
 function App() {
   const popularRoutes = [
@@ -34,17 +34,6 @@ function App() {
     }
   ];
 
-  const handlePayment = async (amount: number, phoneNumber: string) => {
-    try {
-      const response = await initiateSTKPush(amount, phoneNumber);
-      console.log('Payment response:', response);
-      // Handle the response as needed
-    } catch (error) {
-      console.error('Payment error:', error);
-      // Handle the error as needed
-    }
-  };
-
   return (
     <div className="min-h-screen">
       <Header />
@@ -55,7 +44,7 @@ function App() {
         <div className="container bg-gray-50 mx-auto px-4">
           <div className="max-w-4xl mx-auto bg-blue-100 rounded-lg shadow-lg p-6 mb-16">
             <h2 className="text-2xl font-bold text-green-600 mb-6"  style={{ fontFamily: 'Courier New, monospace', fontWeight: 'normal' }}>Get your ticket</h2>
-            <BookingForm onPayment={handlePayment} />
+            <BookingForm />
           </div>
 
           {/* Popular Routes */}
@@ -72,6 +61,7 @@ function App() {
       <MoreSection />
       <ContactSection />
       <Footer />
+      <ChatWidget />
     </div>
   );
 }
