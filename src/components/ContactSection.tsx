@@ -28,7 +28,7 @@ const ContactSection = () => {
                 <input
                   type="email"
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#8B0000] focus:border-[#8B0000]"
-                  placeholder="your@email.com"
+                  placeholder="kipngenogregory@gmail.com"
                 />
               </div>
               
